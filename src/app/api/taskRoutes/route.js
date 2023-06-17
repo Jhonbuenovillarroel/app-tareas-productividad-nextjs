@@ -43,7 +43,7 @@ export async function PUT(request) {
    const data = Object.values(bodyRequest);
    const response = await new Promise((resolve, reject) => {
       connection.execute(
-         "update tareas set nombre = ?, fechaInicio = ?, fechaTermino = ?, descripcion = ? where id = ?",
+         "update tareas set nombre = ?, fechaInicio = ?, fechaTermino = ?, descripcion = ?, tiempo = ? where id = ?",
          data,
          (error, result, fields) => {
             if (error) {

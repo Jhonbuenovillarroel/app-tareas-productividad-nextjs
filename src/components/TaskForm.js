@@ -203,6 +203,7 @@ export default function TaskForm() {
                                  fechaTermino:
                                     datosFormulario.fechaTermino.slice(0, 10),
                                  descripcion: datosFormulario.descripcion,
+                                 tiempo: datosFormulario.tiempo,
                                  id: datosFormulario.id,
                               }),
                            });
