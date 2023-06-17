@@ -11,7 +11,6 @@ export async function GET(request) {
                   reject(error);
                }
                resolve(results);
-               console.log(`Tareas obtenidas correctamente`);
             }
          );
       });
@@ -24,17 +23,15 @@ export async function GET(request) {
 
 export async function POST(request) {
    const body = await request.json();
-   console.log(body);
    const response = await new Promise((resolve, reject) => {
       connection.execute(
-         "insert into tareas (nombre, fechaInicio, fechaTermino, descripcion) values (?, ?, ?, ?)",
+         "insert into tareas (nombre, fechaInicio, fechaTermino, tiempo, descripcion) values (?, ?, ?, ?, ?)",
          Object.values(body),
          (error, results, fields) => {
             if (error) {
                reject(error);
             }
             resolve(results.insertId);
-            console.log(`Tarea agregada correctamente`);
          }
       );
    });
@@ -53,7 +50,6 @@ export async function PUT(request) {
                reject(error);
             }
             resolve(result);
-            console.log("Tarea actualizada conrrectamente");
          }
       );
    });

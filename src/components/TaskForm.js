@@ -17,6 +17,7 @@ export default function TaskForm() {
       const form = e.target;
       const formData = new FormData(form);
       const formJson = Object.fromEntries(formData.entries());
+      console.log(formJson);
       const response = await fetch("/api/taskRoutes", {
          method: "POST",
          headers: {
@@ -124,6 +125,35 @@ export default function TaskForm() {
                      type="date"
                      name="fechaTermino"
                      id="fechaTermino"
+                  />
+               </div>
+
+               <div className="flex flex-col gap-1">
+                  <label htmlFor="tiempo">
+                     Tiempo Límite:
+                     <span className="ml-1 text-sm italic">
+                        (horas : minutos)
+                     </span>{" "}
+                  </label>
+                  <input
+                     required
+                     value={
+                        datosFormulario.editar
+                           ? datosFormulario.tiempo
+                           : undefined
+                     }
+                     onChange={(e) => {
+                        datosFormulario.editar
+                           ? recibirTareaActualizada({
+                                ...datosFormulario,
+                                tiempo: e.target.value,
+                             })
+                           : undefined;
+                     }}
+                     className="calendar-white bg-zinc-800 rounded py-1 px-3 text-sm outline-none"
+                     type="time"
+                     name="tiempo"
+                     id="tiempo"
                   />
                </div>
 
