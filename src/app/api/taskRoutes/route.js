@@ -24,6 +24,7 @@ export async function GET(request) {
 
 export async function POST(request) {
    const body = await request.json();
+   console.log(body);
    const response = await new Promise((resolve, reject) => {
       connection.execute(
          "insert into tareas (nombre, fechaInicio, fechaTermino, descripcion) values (?, ?, ?, ?)",

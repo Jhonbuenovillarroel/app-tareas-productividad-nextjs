@@ -7,9 +7,12 @@ export default function TaskList() {
    const { tareas } = useContext(HomeContext);
    return (
       <section className="w-[800px] grid grid-cols-1 gap-8 max-w-7xl mx-auto mt-16 mb-16">
+         <h1 className="text-[24px] text-cyan-500 mx-auto font-bold uppercase mb-8 tracking-widest">
+            Tareas del día
+         </h1>
          {tareas.map((tarea) => (
             <div key={tarea.id}>
-               <Task datos={tarea} />
+               <Task datosTarea={tarea} />
             </div>
          ))}
       </section>
