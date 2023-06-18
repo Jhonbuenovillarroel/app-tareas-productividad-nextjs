@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { HomeContext } from "@/contexts/context";
+import { useContext, useEffect, useState } from "react";
 
 export default function CheckBox({ datos, className, value, title }) {
    const [background, setBackground] = useState("bg-zinc-700");
+   const { recibirTareaActualizada } = useContext(HomeContext);
 
    useEffect(() => {
       if (datos.completado === 0) {
@@ -21,6 +23,10 @@ export default function CheckBox({ datos, className, value, title }) {
          setBackground(
             "bg-cyan-400 bg-[url('/check.png')] bg-[center_bottom_8px] bg-no-repeat bg-[length:14px_14px]"
          );
+         recibirTareaActualizada({
+            ...datos,
+            completado: 1,
+         });
 
          const response = await fetch(`/api/taskRoutes/${datos.id}`, {
             method: "PUT",
@@ -32,6 +38,10 @@ export default function CheckBox({ datos, className, value, title }) {
       } else {
          nextBackground = "bg-zinc-700";
          setBackground("bg-zinc-700");
+         recibirTareaActualizada({
+            ...datos,
+            completado: 0,
+         });
 
          const response = await fetch(`/api/taskRoutes/${datos.id}`, {
             method: "PUT",
