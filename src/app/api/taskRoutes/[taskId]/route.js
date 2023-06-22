@@ -13,7 +13,6 @@ export async function DELETE(request, context) {
                reject(error);
             }
             resolve(results);
-            console.log("Tarea eliminada correctamente");
          }
       );
    });

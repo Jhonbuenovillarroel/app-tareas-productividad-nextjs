@@ -6,7 +6,6 @@ import TaskList from "@/components/TaskList";
 import Temporizador from "@/components/Temporizador";
 import { HomeContext } from "@/contexts/context";
 import { useEffect, useState, useRef } from "react";
-import worker from "@/webWorkers/workers";
 
 export default function Home() {
    const [tareas, setTareas] = useState([]);
@@ -21,7 +20,6 @@ export default function Home() {
       const response = await fetch("/api/taskRoutes");
       const result = await response.json();
       setTareas(result);
-      console.log(result);
    }
 
    function recibirNuevaTarea(nuevaTarea) {
@@ -63,16 +61,13 @@ export default function Home() {
       setTemporizadorAbierto(boolean);
    }
 
+   function recibirTareasActualizadas(tareas) {
+      setTareas(tareas);
+   }
+
    useEffect(() => {
       obtenerDatos();
    }, []);
-
-   const first = useRef(null);
-   const second = useRef(null);
-
-   worker.onmessage = (e) => {
-      console.log(e.data);
-   };
 
    return (
       <HomeContext.Provider
@@ -85,33 +80,10 @@ export default function Home() {
             datosFormulario,
             cerrarAbrirTemporizador,
             temporizadorAbierto,
+            recibirTareasActualizadas,
          }}
       >
          <main className="grid box-border">
-            <input
-               onChange={() => {
-                  worker.postMessage([
-                     first.current.value,
-                     second.current.value,
-                  ]);
-                  console.log("Message posted to worker");
-               }}
-               ref={first}
-               type="text"
-               className="w-40 text-black p-2"
-            />
-            <input
-               onChange={() => {
-                  worker.postMessage([
-                     first.current.value,
-                     second.current.value,
-                  ]);
-                  console.log("Message posted to worker");
-               }}
-               ref={second}
-               type="text"
-               className="w-40 text-black mt-2 p-2"
-            />
             <Button
                className="shadow-[0_0_100px_-4px_rgba(27,53,108,0.75)] px-4 py-3 w-44 rounded-md justify-self-center bg-cyan-700 mt-12"
                value="Agregar Tarea"

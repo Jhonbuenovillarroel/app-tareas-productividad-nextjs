@@ -4,69 +4,46 @@ import Image from "next/image";
 import { HomeContext } from "@/contexts/context";
 
 export default function Temporizador() {
-   const { datosFormulario, cerrarAbrirTemporizador } = useContext(HomeContext);
-   const [segundos, setSegundos] = useState(datosFormulario.tiempo.slice(6, 8));
-   const [minutos, setMinutos] = useState(datosFormulario.tiempo.slice(3, 5));
+   const { recibirTareaActualizada, datosFormulario, cerrarAbrirTemporizador } =
+      useContext(HomeContext);
    const [horas, setHoras] = useState(datosFormulario.tiempo.slice(0, 2));
-   const [temporizador, setTemporizador] = useState(null);
+   const [minutos, setMinutos] = useState(datosFormulario.tiempo.slice(3, 5));
+   const [segundos, setSegundos] = useState(datosFormulario.tiempo.slice(6, 8));
    const [temporizadorIniciado, setTemporizadorIniciado] = useState(false);
+   const [worker, setWorker] = useState(
+      new Worker(new URL("../webWorkers/worker.js", import.meta.url))
+   );
+   const [deshabilitado, setDeshabilitado] = useState("");
+   const [contador, setContador] = useState(0);
+   const [mostrarBoton, setMostrarBoton] = useState(false);
+
+   const parrafo = useRef(null);
 
    function iniciarTemporizador() {
-      if (!temporizadorIniciado) {
-         setTemporizador(
-            setInterval(() => {
-               setSegundos((prevSecond) => {
-                  if (parseInt(prevSecond) === 0) {
-                     setMinutos((prevMinute) => {
-                        if (parseInt(prevMinute) === 0) {
-                           setHoras((prevHour) => {
-                              if (parseInt(prevHour) === 0) {
-                                 return `00`;
-                              }
-                              if (parseInt(prevHour) < 11) {
-                                 return `0${parseInt(prevHour) - 1}`;
-                              } else {
-                                 return `${parseInt(prevHour) - 1}`;
-                              }
-                           });
-                           if (parseInt(horas) > 0) {
-                              return `59`;
-                           }
-                           return `00`;
-                        }
-                        if (parseInt(prevMinute) < 11) {
-                           return `0${parseInt(prevMinute) - 1}`;
-                        } else {
-                           return `${parseInt(prevMinute) - 1}`;
-                        }
-                     });
-                     return `59`;
-                  }
-                  if (parseInt(prevSecond) < 11) {
-                     return `0${parseInt(prevSecond) - 1}`;
-                  } else {
-                     return `${parseInt(prevSecond) - 1}`;
-                  }
-               });
-            }, 1000)
-         );
-         setTemporizadorIniciado(true);
-      }
+      worker.postMessage([horas, minutos, segundos, temporizadorIniciado]);
+
+      worker.onmessage = (e) => {
+         if (e.data[3] === true) {
+            setHoras(e.data[0]);
+            setMinutos(e.data[1]);
+            setSegundos(e.data[2]);
+         }
+         parrafo.current.textContent = `${e.data[0]}:${e.data[1]}:${e.data[2]}`;
+         document.title = `${e.data[0]}:${e.data[1]}:${e.data[2]} - App Tareas`;
+      };
+
+      setTemporizadorIniciado(true);
+
       cerrarAbrirTemporizador(true);
    }
 
-   const reproducirAudio = () => {
-      audioRef.current.play();
-   };
-   const [isPlaying, setPlaying] = useState(false);
-   const [deshabilitado, setDeshabilitado] = useState("");
-
-   let contador = 0;
    function audioTerminado() {
       if (contador < 3) {
          audioRef.current.play();
+         setContador((prev) => prev + 1);
+      } else {
+         setContador(0);
       }
-      contador++;
    }
 
    const audioRef = useRef(null);
@@ -75,23 +52,38 @@ export default function Temporizador() {
       setDeshabilitado("disabled");
    }
 
+   async function marcarTareaComoCompletada() {
+      recibirTareaActualizada({
+         ...datosFormulario,
+         completado: 1,
+      });
+
+      const response = await fetch(`/api/taskRoutes/${datosFormulario.id}`, {
+         method: "PUT",
+         headers: {
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ completado: 1 }),
+      });
+   }
+
    useEffect(() => {
-      if (
-         parseInt(horas) === 0 &&
-         parseInt(minutos) === 0 &&
-         parseInt(segundos) === 0
-      ) {
-         detenerTemporizador();
-         // reproducirAudio();
+      if (horas === "00" && minutos === "00" && segundos === "00") {
+         worker.terminate();
+         setWorker(
+            new Worker(new URL("../webWorkers/worker.js", import.meta.url))
+         );
          audioTerminado();
          deshabilitarBoton();
+         if (datosFormulario.completado !== 1) {
+            marcarTareaComoCompletada();
+         }
       }
-   });
+   }, [horas, minutos, segundos]);
 
-   function detenerTemporizador() {
-      clearInterval(temporizador);
-      setTemporizadorIniciado(false);
-   }
+   useEffect(() => {
+      document.title = `${parrafo.current.textContent} - App Tareas`;
+   });
 
    return (
       <div className="box-border">
@@ -107,7 +99,15 @@ export default function Temporizador() {
             <Image
                onClick={() => {
                   cerrarAbrirTemporizador(false);
-                  detenerTemporizador();
+                  audioRef.current.pause();
+
+                  worker.terminate();
+                  setWorker(
+                     new Worker(
+                        new URL("../webWorkers/worker.js", import.meta.url)
+                     )
+                  );
+                  document.title = "App Tareas";
                }}
                className=" cursor-pointer absolute right-[-24px] top-[-20px]"
                src="/delete.png"
@@ -115,18 +115,73 @@ export default function Temporizador() {
                height={36}
                alt="Botón cerrar formulario"
             />
-            <p className="text-[52px] font-bold">{`${horas}:${minutos}:${segundos}`}</p>
+
+            <p
+               ref={parrafo}
+               className="text-[52px] font-bold"
+            >{`${horas}:${minutos}:${segundos}`}</p>
             <div className="mt-4 w-full flex flex-col justify-center items-center">
+               {mostrarBoton ? (
+                  temporizadorIniciado ? (
+                     <Button
+                        onClick={() => {
+                           worker.terminate();
+
+                           setWorker(
+                              new Worker(
+                                 new URL(
+                                    "../webWorkers/worker.js",
+                                    import.meta.url
+                                 )
+                              )
+                           );
+                           setTemporizadorIniciado(false);
+                           setHoras(parrafo.current.textContent.slice(0, 2));
+                           setMinutos(parrafo.current.textContent.slice(3, 5));
+                           setSegundos(parrafo.current.textContent.slice(6, 8));
+                        }}
+                        className="px-4 py-3 w-40 rounded-md justify-self-center bg-gray-800"
+                        value="Detener"
+                     />
+                  ) : (
+                     <Button
+                        onClick={() => {
+                           iniciarTemporizador();
+                        }}
+                        className="px-4 py-3 w-40 rounded-md justify-self-center bg-gray-800"
+                        value="Reanudar"
+                     />
+                  )
+               ) : (
+                  <Button
+                     onClick={() => {
+                        iniciarTemporizador();
+                        setMostrarBoton(true);
+                     }}
+                     className="px-4 py-3 w-40 rounded-md justify-self-center bg-cyan-900"
+                     value="Iniciar"
+                  />
+               )}
+
                <Button
-                  disabled={deshabilitado}
-                  onClick={iniciarTemporizador}
-                  className="px-4 py-3 w-40 rounded-md justify-self-center bg-cyan-900"
-                  value="Iniciar"
-               />
-               <Button
-                  onClick={detenerTemporizador}
-                  className="mt-4 px-4 py-3 w-40 rounded-md justify-self-center bg-gray-800"
-                  value="Detener"
+                  onClick={() => {
+                     parrafo.current.textContent = `${horas}:${minutos}:${segundos}`;
+                     worker.terminate();
+                     setWorker(
+                        new Worker(
+                           new URL("../webWorkers/worker.js", import.meta.url)
+                        )
+                     );
+                     setTemporizadorIniciado(false);
+
+                     setHoras(datosFormulario.tiempo.slice(0, 2));
+                     setMinutos(datosFormulario.tiempo.slice(3, 5));
+                     setSegundos(datosFormulario.tiempo.slice(6, 8));
+
+                     setMostrarBoton(false);
+                  }}
+                  className="mt-4 px-4 py-3 w-40 rounded-md justify-self-center bg-cyan-900"
+                  value="Reiniciar"
                />
             </div>
          </div>

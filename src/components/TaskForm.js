@@ -17,7 +17,6 @@ export default function TaskForm() {
       const form = e.target;
       const formData = new FormData(form);
       const formJson = Object.fromEntries(formData.entries());
-      console.log(formJson);
       const response = await fetch("/api/taskRoutes", {
          method: "POST",
          headers: {
@@ -147,7 +146,7 @@ export default function TaskForm() {
                   }}
                   className="calendar-white bg-zinc-800 rounded py-1 px-3 text-sm outline-none"
                   type="time"
-                  step={2}
+                  step={1}
                   name="tiempo"
                   id="tiempo"
                />

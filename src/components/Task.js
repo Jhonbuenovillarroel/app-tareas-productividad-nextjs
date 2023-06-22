@@ -28,8 +28,16 @@ export default function Task({ datosTarea }) {
       });
    });
 
+   function handle_drag() {
+      console.log("Se ejecuta");
+   }
+
    return (
-      <div className="flex max-w-xs w-full sm:w-full sm:max-w-4xl justify-self-center p-6 rounded-lg bg-gray-900 shadow-[0_0_100px_-4px_rgba(27,53,108,0.5)]">
+      <div
+         draggable={true}
+         onDrag={handle_drag}
+         className="flex max-w-xs w-full sm:w-full sm:max-w-4xl justify-self-center p-6 rounded-lg bg-gray-900 shadow-[0_0_100px_-4px_rgba(27,53,108,0.5)]"
+      >
          <div className="flex flex-col w-full sm:flex-row sm:items-center sm:justify-between gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-8">
                <CheckBox
@@ -123,7 +131,6 @@ export default function Task({ datosTarea }) {
                            },
                         }
                      );
-                     const result = await response.json();
                   }}
                   className="px-4 py-3 sm:w-36 h-12 rounded-md justify-self-center bg-gray-800"
                   value="Eliminar"
