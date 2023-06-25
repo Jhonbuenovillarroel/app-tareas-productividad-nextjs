@@ -2,12 +2,12 @@ import { HomeContext } from "@/contexts/context";
 import { useContext, useEffect, useState } from "react";
 
 export default function CheckBox({ datos, className, value, title }) {
-   const [background, setBackground] = useState("bg-zinc-700");
+   const [background, setBackground] = useState("bg-zinc-500");
    const { recibirTareaActualizada } = useContext(HomeContext);
 
    useEffect(() => {
       if (datos.completado === 0) {
-         setBackground("bg-zinc-700");
+         setBackground("bg-zinc-500");
       } else {
          setBackground(
             "bg-cyan-400 bg-[url('/check.png')] bg-[center_bottom_8px] bg-no-repeat bg-[length:14px_14px]"
@@ -17,7 +17,7 @@ export default function CheckBox({ datos, className, value, title }) {
 
    async function cambiarColorCheckBox() {
       let nextBackground;
-      if (background === "bg-zinc-700") {
+      if (background === "bg-zinc-500") {
          nextBackground =
             "bg-cyan-400 bg-[url('/check.png')] bg-[center_bottom_8px] bg-no-repeat bg-[length:14px_14px]";
          setBackground(
@@ -36,8 +36,8 @@ export default function CheckBox({ datos, className, value, title }) {
             body: JSON.stringify({ completado: 1 }),
          });
       } else {
-         nextBackground = "bg-zinc-700";
-         setBackground("bg-zinc-700");
+         nextBackground = "bg-zinc-500";
+         setBackground("bg-zinc-500");
          recibirTareaActualizada({
             ...datos,
             completado: 0,

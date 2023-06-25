@@ -5,6 +5,9 @@
 .calendar-white::-webkit-calendar-picker-indicator {
    filter: invert(100%);
 }
+img {
+   -webkit-user-drag: none;
+}
 
 :root {
    --foreground-rgb: 0, 0, 0;
