@@ -19,6 +19,8 @@ export default function Home() {
    async function obtenerDatos() {
       const response = await fetch("/api/taskRoutes");
       const result = await response.json();
+
+      console.log(result);
       setTareas(result);
    }
 

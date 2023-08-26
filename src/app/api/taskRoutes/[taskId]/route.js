@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
-import connection from "../../../../../utils/db";
+import prisma from "@/lib/prisma/prisma";
 
-export async function DELETE(request, context) {
-   const id = context.params.taskId;
+export async function DELETE(request, response) {
+   const id = response.params.taskId;
+   console.log(response);
 
-   const response = await new Promise((resolve, reject) => {
-      connection.execute(
-         "delete from tareas where id = ?",
-         [id],
-         (error, results, fields) => {
-            if (error) {
-               reject(error);
-            }
-            resolve(results);
-         }
-      );
+   const tarea = await prisma.task.delete({
+      where: {
+         id: parseInt(id),
+      },
    });
 
    return NextResponse.json({ id });
@@ -25,17 +19,13 @@ export async function PUT(request, context) {
    const body = await request.json();
    const data = Object.values(body);
 
-   const response = await new Promise((resolve, reject) => {
-      connection.execute(
-         "update tareas set completado = ? where id = ?",
-         [...data, id],
-         (error, results, fields) => {
-            if (error) {
-               reject(error);
-            }
-            resolve(results);
-         }
-      );
+   const tarea = await prisma.task.update({
+      where: {
+         id: parseInt(id),
+      },
+      data: {
+         completado: data[0],
+      },
    });
 
    return NextResponse.json(id);

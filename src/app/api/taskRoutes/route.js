@@ -1,21 +1,11 @@
 import { NextResponse } from "next/server";
-import connection from "../../../../utils/db";
+import prisma from "@/lib/prisma/prisma";
 
 export async function GET(request) {
    try {
-      const result = await new Promise((resolve, reject) => {
-         connection.execute(
-            "select * from tareas",
-            (error, results, fields) => {
-               if (error) {
-                  reject(error);
-               }
-               resolve(results);
-            }
-         );
-      });
+      const tareas = await prisma.task.findMany();
 
-      return NextResponse.json(result);
+      return NextResponse.json(tareas);
    } catch (error) {
       return NextResponse.error({ error });
    }
@@ -23,36 +13,36 @@ export async function GET(request) {
 
 export async function POST(request) {
    const body = await request.json();
-   const response = await new Promise((resolve, reject) => {
-      connection.execute(
-         "insert into tareas (nombre, fechaInicio, fechaTermino, tiempo, descripcion) values (?, ?, ?, ?, ?)",
-         Object.values(body),
-         (error, results, fields) => {
-            if (error) {
-               reject(error);
-            }
-            resolve(results.insertId);
-         }
-      );
+
+   const newTask = await prisma.task.create({
+      data: {
+         nombre: body.nombre,
+         fechaInicio: body.fechaInicio,
+         fechaTermino: body.fechaTermino,
+         tiempo: body.tiempo,
+         descripcion: body.descripcion,
+      },
    });
-   return NextResponse.json({ ...body, id: response });
+
+   return NextResponse.json(newTask);
 }
 
 export async function PUT(request) {
    const bodyRequest = await request.json();
    const data = Object.values(bodyRequest);
-   const response = await new Promise((resolve, reject) => {
-      connection.execute(
-         "update tareas set nombre = ?, fechaInicio = ?, fechaTermino = ?, descripcion = ?, tiempo = ? where id = ?",
-         data,
-         (error, result, fields) => {
-            if (error) {
-               reject(error);
-            }
-            resolve(result);
-         }
-      );
+
+   const tarea = await prisma.task.update({
+      where: {
+         id: data[5],
+      },
+      data: {
+         nombre: data[0],
+         fechaInicio: data[1],
+         fechaTermino: data[2],
+         descripcion: data[3],
+         tiempo: data[4],
+      },
    });
 
-   return NextResponse.json(response);
+   return NextResponse.json(tarea);
 }

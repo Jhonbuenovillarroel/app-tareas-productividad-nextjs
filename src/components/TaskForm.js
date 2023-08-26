@@ -14,6 +14,7 @@ export default function TaskForm() {
 
    async function agregarTarea(e) {
       e.preventDefault();
+
       const form = e.target;
       const formData = new FormData(form);
       const formJson = Object.fromEntries(formData.entries());
@@ -25,6 +26,8 @@ export default function TaskForm() {
          body: JSON.stringify(formJson),
       });
       const data = await response.json();
+
+      console.log(data);
       recibirNuevaTarea({ ...data, completado: 0 });
       form.reset();
    }
@@ -82,7 +85,7 @@ export default function TaskForm() {
                   required
                   value={
                      datosFormulario.editar
-                        ? datosFormulario.fechaInicio.slice(0, 10)
+                        ? datosFormulario.fechaInicio
                         : undefined
                   }
                   onChange={(e) => {
@@ -106,7 +109,7 @@ export default function TaskForm() {
                   required
                   value={
                      datosFormulario.editar
-                        ? datosFormulario.fechaTermino.slice(0, 10)
+                        ? datosFormulario.fechaTermino
                         : undefined
                   }
                   onChange={(e) => {
@@ -191,14 +194,8 @@ export default function TaskForm() {
                            },
                            body: JSON.stringify({
                               nombre: datosFormulario.nombre,
-                              fechaInicio: datosFormulario.fechaInicio.slice(
-                                 0,
-                                 10
-                              ),
-                              fechaTermino: datosFormulario.fechaTermino.slice(
-                                 0,
-                                 10
-                              ),
+                              fechaInicio: datosFormulario.fechaInicio,
+                              fechaTermino: datosFormulario.fechaTermino,
                               descripcion: datosFormulario.descripcion,
                               tiempo: datosFormulario.tiempo,
                               id: datosFormulario.id,

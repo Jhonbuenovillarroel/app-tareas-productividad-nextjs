@@ -40,18 +40,6 @@ export default function Task({ datosTarea }) {
       });
    });
 
-   // useEffect(() => {
-   //    const handleMouseLeave = (event) => {
-   //       if (event.clientY <= 10 || event.clientY >= window.innerHeight) {
-   //          setIntervalRef.current = setInterval(() => {
-   //             window.scrollBy(0, 9);
-   //          }, 10);
-   //       }
-   //    };
-
-   //    window.addEventListener("mouseout", handleMouseLeave);
-   // }, []);
-
    function drop_handle(event) {
       event.preventDefault();
    }
